@@ -69,10 +69,8 @@ begin
     TargetBitmap.Width  := InputImage.Width;
     TargetBitmap.Height := InputImage.Height;
 
-    TargetBitmap.Canvas.Brush.Color := clWhite;
-    TargetBitmap.Canvas.FillRect(ImgRect);
-    TargetBitmap.Canvas.CopyRect(ImgRect, InputImage.Canvas, ImgRect);
-    TargetBitmap.SaveToFile(TargetImageFileName);
+    {TargetBitmap.Canvas.Brush.Color := clWhite;
+    TargetBitmap.Canvas.FillRect(ImgRect);}
 
     TargetBitmapMask.PixelFormat := pf24bit;
     TargetBitmapMask.Width  := InputImage.Width;
@@ -85,8 +83,10 @@ begin
          Alpha := InputImage.ScanAt(X, Y).alpha;
          Col := RGBToColor(Alpha, Alpha, Alpha);
          TargetBitmapMask.Canvas.Pixels[X, Y] := Col;
+         TargetBitmap.Canvas.Pixels[X, Y] := InputImage.ScanAt(X, Y).ToColor();
       end;
     end;
+    TargetBitmap.SaveToFile(TargetImageFileName);
     TargetBitmapMask.SaveToFile(TargetImageMaskFileName);
   finally
     InputImage.Free;
