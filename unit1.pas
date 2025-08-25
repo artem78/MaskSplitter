@@ -20,6 +20,7 @@ type
     OutputDirectoryEdit: TDirectoryEdit;
     InputFileNameEdit: TFileNameEdit;
     procedure Button1Click(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
     procedure InputFileNameEditChange(Sender: TObject);
   private
 
@@ -31,6 +32,10 @@ var
   Form1: TForm1;
 
 implementation
+
+uses  fileinfo
+  , winpeimagereader {need this for reading exe info}
+  , elfreader; {needed for reading ELF executables}
 
 {$R *.lfm}
 
@@ -100,6 +105,29 @@ begin
   if CheckBox1.Checked then
     DeleteFile(InputFileNameEdit.Text);
 
+end;
+
+procedure TForm1.FormCreate(Sender: TObject);
+var
+  VersionStr: string;
+  FileVerInfo: TFileVersionInfo;
+  I: Integer;
+begin
+  FileVerInfo:=TFileVersionInfo.Create(nil);
+  try
+    FileVerInfo.ReadFileInfo;
+    VersionStr := FileVerInfo.VersionStrings.Values[{'ProductVersion'} 'FileVersion'];
+  finally
+    FileVerInfo.Free;
+  end;
+
+  for I := 0 to 1 do
+  begin
+    if VersionStr.EndsWith('.0') then
+      Delete(VersionStr, VersionStr.Length - 2, 2);
+  end;
+
+  Caption := Caption + ' - v' + VersionStr;
 end;
 
 procedure TForm1.InputFileNameEditChange(Sender: TObject);
