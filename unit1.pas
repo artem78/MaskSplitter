@@ -14,6 +14,7 @@ type
 
   TForm1 = class(TForm)
     Button1: TButton;
+    CheckBox1: TCheckBox;
     Label1: TLabel;
     Label2: TLabel;
     OutputDirectoryEdit: TDirectoryEdit;
@@ -95,6 +96,9 @@ begin
     TargetBitmap.Free;
     TargetBitmapMask.Free;
   end;
+
+  if CheckBox1.Checked then
+    DeleteFile(InputFileNameEdit.Text);
 
 end;
 
