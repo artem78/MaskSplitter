@@ -28,3 +28,9 @@ lib/
 
 # Application bundle for Mac OS
 *.app/
+
+
+
+# Свои определения
+MaskSplitter
+*.backup
