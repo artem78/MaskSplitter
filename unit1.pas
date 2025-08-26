@@ -20,10 +20,12 @@ type
     OutputDirectoryEdit: TDirectoryEdit;
     InputFileNameEdit: TFileNameEdit;
     procedure Button1Click(Sender: TObject);
+    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure InputFileNameEditChange(Sender: TObject);
   private
-
+    procedure LoadSettings;
+    procedure SaveSettings;
   public
 
   end;
@@ -35,7 +37,8 @@ implementation
 
 uses  fileinfo
   , winpeimagereader {need this for reading exe info}
-  , elfreader; {needed for reading ELF executables}
+  , elfreader {needed for reading ELF executables}
+  , Registry;
 
 {$R *.lfm}
 
@@ -107,12 +110,20 @@ begin
 
 end;
 
+procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+begin
+  SaveSettings;
+end;
+
 procedure TForm1.FormCreate(Sender: TObject);
 var
   VersionStr: string;
   FileVerInfo: TFileVersionInfo;
   I: Integer;
 begin
+  LoadSettings;
+
+
   FileVerInfo:=TFileVersionInfo.Create(nil);
   try
     FileVerInfo.ReadFileInfo;
@@ -134,6 +145,50 @@ procedure TForm1.InputFileNameEditChange(Sender: TObject);
 begin
   if (InputFileNameEdit.Text <> '') and (OutputDirectoryEdit.Text = '') then
     OutputDirectoryEdit.Text := ExtractFileDir(InputFileNameEdit.Text);
+end;
+
+procedure TForm1.LoadSettings;
+var
+  Registry: TRegistry;
+begin
+  Registry := TRegistry.Create(KEY_READ);
+  try
+    Registry.RootKey := {HKEY_LOCAL_MACHINE} HKEY_CURRENT_USER;
+    if Registry.OpenKeyReadOnly('\Software\artem78\MaskSplitter\') then
+    begin
+      if Registry.ValueExists('SourceFile') and FileExists(Registry.ReadString('SourceFile')) then
+        InputFileNameEdit.Text := Registry.ReadString('SourceFile');
+
+      if Registry.ValueExists('TargetDir') and DirectoryExists(Registry.ReadString('TargetDir')) then
+        OutputDirectoryEdit.Text := Registry.ReadString('TargetDir');
+
+      if Registry.ValueExists('DeleteSourceFile') then
+        CheckBox1.Checked := Registry.ReadBool('DeleteSourceFile');
+
+      Registry.CloseKey;
+    end;
+  finally
+    Registry.Free;
+  end;
+end;
+
+procedure TForm1.SaveSettings;
+var
+  Registry: TRegistry;
+begin
+  Registry := TRegistry.Create;
+  try
+    Registry.RootKey := {HKEY_LOCAL_MACHINE} HKEY_CURRENT_USER;
+    if Registry.OpenKey('\Software\artem78\MaskSplitter\', True) then
+    begin
+      Registry.WriteString('SourceFile', InputFileNameEdit.Text);
+      Registry.WriteString('TargetDir', OutputDirectoryEdit.Text);
+      Registry.WriteBool('DeleteSourceFile', CheckBox1.Checked);
+      Registry.CloseKey;
+    end;
+  finally
+    Registry.Free;  // In non-Windows operating systems this flushes the reg.xml file to disk
+  end;
 end;
 
 end.
