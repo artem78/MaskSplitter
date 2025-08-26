@@ -135,7 +135,7 @@ begin
   for I := 0 to 1 do
   begin
     if VersionStr.EndsWith('.0') then
-      Delete(VersionStr, VersionStr.Length - 2, 2);
+      Delete(VersionStr, VersionStr.Length - 2 + 1, 2);
   end;
 
   Caption := Caption + ' - v' + VersionStr;
