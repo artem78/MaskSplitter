@@ -2,6 +2,8 @@ This small tool separates input PNG file into two BMPs: image itself + mask (alp
 
 ![](diagram.svg "")
 
+![](screenshot.png)
+
 TODOs:
  - [ ] Load ICO
  - [ ] Load SVG
