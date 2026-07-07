@@ -98,7 +98,7 @@ begin
     TargetBitmap.SaveToFile(TargetImageFileName);
     TargetBitmapMask.SaveToFile(TargetImageMaskFileName);
 
-    ShowMessage('Выполнено!');
+    ShowMessage('Done!');
   finally
     InputImage.Free;
     TargetBitmap.Free;

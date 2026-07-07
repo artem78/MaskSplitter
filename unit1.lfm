@@ -4,7 +4,7 @@ object Form1: TForm1
   Top = 167
   Width = 438
   BorderStyle = bsDialog
-  Caption = 'Разделка PNG на BMP с маской'
+  Caption = 'Mask Splitter'
   ClientHeight = 253
   ClientWidth = 438
   OnClose = FormClose
@@ -43,16 +43,16 @@ object Form1: TForm1
     Left = 16
     Height = 16
     Top = 16
-    Width = 66
-    Caption = 'PNG файл:'
+    Width = 53
+    Caption = 'PNG file:'
     ParentColor = False
   end
   object Label2: TLabel
     Left = 16
     Height = 16
     Top = 82
-    Width = 96
-    Caption = 'Целевая папка:'
+    Width = 99
+    Caption = 'Target directory:'
     ParentColor = False
   end
   object Button1: TButton
@@ -61,7 +61,7 @@ object Form1: TForm1
     Top = 208
     Width = 143
     Anchors = [akLeft, akBottom]
-    Caption = 'Преобразовать'
+    Caption = 'Convert'
     OnClick = Button1Click
     TabOrder = 2
   end
@@ -69,8 +69,8 @@ object Form1: TForm1
     Left = 16
     Height = 22
     Top = 159
-    Width = 207
-    Caption = 'Удалить исходный PNG файл'
+    Width = 160
+    Caption = 'Delete source PNG file'
     TabOrder = 3
   end
 end
