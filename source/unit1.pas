@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, EditBtn, StdCtrls,
-  BGRABitmap, LazFileUtils;
+  ExtCtrls, BGRABitmap, LazFileUtils;
 
 type
 
@@ -15,6 +15,10 @@ type
   TForm1 = class(TForm)
     Button1: TButton;
     CheckBox1: TCheckBox;
+    GroupBox1: TGroupBox;
+    GroupBox2: TGroupBox;
+    ImagePreview: TImage;
+    MaskPreview: TImage;
     Label1: TLabel;
     Label2: TLabel;
     OutputDirectoryEdit: TDirectoryEdit;
@@ -26,6 +30,9 @@ type
   private
     procedure LoadSettings;
     procedure SaveSettings;
+    //procedure UpdatePreviews;
+    procedure LoadImage;
+    procedure SaveResult;
   public
 
   end;
@@ -45,8 +52,12 @@ uses  fileinfo
 { TForm1 }
 
 procedure TForm1.Button1Click(Sender: TObject);
+begin
+  SaveResult;
+end;
+
+procedure TForm1.LoadImage;
 var
-  TargetImageFileName, TargetImageMaskFileName: String;
   InputImage: TBGRABitmap;
   TargetBitmap, TargetBitmapMask: TBitmap;
   ImgRect: TRect;
@@ -54,15 +65,8 @@ var
   Alpha: Byte;
   Col: TColor;
 begin
-  if (InputFileNameEdit.Text = '') or (OutputDirectoryEdit.Text = '') then
+  if (InputFileNameEdit.Text = '') {or (OutputDirectoryEdit.Text = '')} then
     exit;
-
-  TargetImageFileName := IncludeTrailingPathDelimiter(OutputDirectoryEdit.Text)
-                 + ExtractFileNameWithoutExt(ExtractFileNameOnly(InputFileNameEdit.Text))
-                 + '.bmp';
-  TargetImageMaskFileName := IncludeTrailingPathDelimiter(OutputDirectoryEdit.Text)
-                 + ExtractFileNameWithoutExt(ExtractFileNameOnly(InputFileNameEdit.Text))
-                 + '_mask.bmp';
 
   InputImage := TBGRABitmap.Create(InputFileNameEdit.Text);
   TargetBitmap := TBitmap.Create;
@@ -95,19 +99,37 @@ begin
          TargetBitmap.Canvas.Pixels[X, Y] := InputImage.ScanAt(X, Y).ToColor();
       end;
     end;
-    TargetBitmap.SaveToFile(TargetImageFileName);
-    TargetBitmapMask.SaveToFile(TargetImageMaskFileName);
 
-    ShowMessage('Done!');
+    ImagePreview.Picture.Assign(TargetBitmap);
+    MaskPreview.Picture.Assign(TargetBitmapMask);
   finally
     InputImage.Free;
     TargetBitmap.Free;
     TargetBitmapMask.Free;
   end;
+end;
+
+procedure TForm1.SaveResult;
+var
+  TargetImageFileName, TargetImageMaskFileName: String;
+begin
+  if (InputFileNameEdit.Text = '') or (OutputDirectoryEdit.Text = '') then
+    exit;
+
+  TargetImageFileName := IncludeTrailingPathDelimiter(OutputDirectoryEdit.Text)
+                 + ExtractFileNameWithoutExt(ExtractFileNameOnly(InputFileNameEdit.Text))
+                 + '.bmp';
+  TargetImageMaskFileName := IncludeTrailingPathDelimiter(OutputDirectoryEdit.Text)
+                 + ExtractFileNameWithoutExt(ExtractFileNameOnly(InputFileNameEdit.Text))
+                 + '_mask.bmp';
+
+  ImagePreview.Picture.SaveToFile(TargetImageFileName);
+  MaskPreview.Picture.SaveToFile(TargetImageMaskFileName);
 
   if CheckBox1.Checked then
     DeleteFile(InputFileNameEdit.Text);
 
+  ShowMessage('Done!');
 end;
 
 procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -143,8 +165,19 @@ end;
 
 procedure TForm1.InputFileNameEditChange(Sender: TObject);
 begin
+  ImagePreview.Canvas.Clear;
+  MaskPreview.Canvas.Clear;
+
   if (InputFileNameEdit.Text <> '') and (OutputDirectoryEdit.Text = '') then
     OutputDirectoryEdit.Text := ExtractFileDir(InputFileNameEdit.Text);
+
+  if (InputFileNameEdit.Text <> '') then
+  begin
+    try
+       LoadImage;
+    except
+    end;
+  end
 end;
 
 procedure TForm1.LoadSettings;
@@ -190,6 +223,11 @@ begin
     Registry.Free;  // In non-Windows operating systems this flushes the reg.xml file to disk
   end;
 end;
+
+{procedure TForm1.UpdatePreviews;
+begin
+
+end;}
 
 end.
 
