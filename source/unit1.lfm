@@ -626,20 +626,21 @@ object Form1: TForm1
   end
   object GroupBox1: TGroupBox
     Left = 16
-    Height = 177
+    Height = 185
     Top = 208
-    Width = 162
+    Width = 170
     AutoSize = True
     BorderSpacing.Around = 4
     Caption = 'Preview - Image:'
-    ClientHeight = 160
-    ClientWidth = 160
+    ClientHeight = 168
+    ClientWidth = 168
     TabOrder = 4
     object ImagePreview: TImage
-      Left = 0
+      Left = 4
       Height = 160
-      Top = 0
+      Top = 4
       Width = 160
+      BorderSpacing.Around = 4
       Center = True
     end
   end
