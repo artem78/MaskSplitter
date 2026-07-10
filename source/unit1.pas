@@ -46,7 +46,7 @@ implementation
 uses  fileinfo
   , winpeimagereader {need this for reading exe info}
   , elfreader {needed for reading ELF executables}
-  , Registry, BGRASVG;
+  , Registry, StrUtils, BGRASVG;
 
 {$R *.lfm}
 
@@ -59,12 +59,14 @@ end;
 
 procedure TForm1.LoadImage;
 var
-  InputImage: TBGRABitmap;
+  InputImage: TBGRABitmap = nil;
+  svg: TBGRASVG = nil;
   TargetBitmap, TargetBitmapMask: TBitmap;
   ImgRect: TRect;
   X, Y: Integer;
   Alpha: Byte;
   Col: TColor;
+  IsSvg: Boolean;
 begin
   // FIXME: в linux при выборе svg файла ошибка "unknown picture extension"
   // https://ibb.co/xShYjxzM
@@ -74,7 +76,23 @@ begin
   if (InputFileNameEdit.Text = '') {or (OutputDirectoryEdit.Text = '')} then
     exit;
 
-  InputImage := TBGRABitmap.Create(InputFileNameEdit.Text);
+  //IsSvg := InputFileNameEdit.Text.EndsWith('.svg', True);
+  IsSvg:=EndsText('.svg', InputFileNameEdit.Text);
+  if IsSvg then
+  begin
+    // исправление некорректных размеров для некоторых svg файлов
+    svg := TBGRASVG.Create(InputFileNameEdit.Text);
+    try
+      svg.ConvertToUnit(cuCustom); // <----
+      InputImage := TBGRABitmap.Create(Round(svg.WidthAsPixel), Round(svg.HeightAsPixel));
+      svg.StretchDraw(InputImage.Canvas2D, 0, 0, cuCustom);
+    finally
+      FreeAndNil(svg);
+    end;
+  end
+  else
+    InputImage := TBGRABitmap.Create(InputFileNameEdit.Text);
+
   TargetBitmap := TBitmap.Create;
   TargetBitmapMask := TBitmap.Create;
   try
@@ -110,7 +128,8 @@ begin
     MaskPreview.Picture.Assign(TargetBitmapMask);
     Label3.Caption:=format('%dx%d px', [InputImage.Width, InputImage.Height]);
   finally
-    InputImage.Free;
+    FreeAndNil(InputImage);
+    //FreeAndNil(svg);
     TargetBitmap.Free;
     TargetBitmapMask.Free;
   end;
