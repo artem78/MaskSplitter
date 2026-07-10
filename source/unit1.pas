@@ -18,6 +18,7 @@ type
     GroupBox1: TGroupBox;
     GroupBox2: TGroupBox;
     ImagePreview: TImage;
+    Label3: TLabel;
     MaskPreview: TImage;
     Label1: TLabel;
     Label2: TLabel;
@@ -65,6 +66,8 @@ var
   Alpha: Byte;
   Col: TColor;
 begin
+  Label3.Caption:='';
+
   if (InputFileNameEdit.Text = '') {or (OutputDirectoryEdit.Text = '')} then
     exit;
 
@@ -102,6 +105,7 @@ begin
 
     ImagePreview.Picture.Assign(TargetBitmap);
     MaskPreview.Picture.Assign(TargetBitmapMask);
+    Label3.Caption:=format('%dx%d px', [InputImage.Width, InputImage.Height]);
   finally
     InputImage.Free;
     TargetBitmap.Free;
@@ -143,6 +147,8 @@ var
   FileVerInfo: TFileVersionInfo;
   I: Integer;
 begin
+  Label3.Caption:='';
+
   LoadSettings;
 
 
