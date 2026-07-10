@@ -1,4 +1,4 @@
-This small tool separates input PNG file into two BMPs: image itself + mask (alpha channel).
+This small tool separates input PNG or SVG file into two BMPs: image itself + mask (alpha channel).
 
 ![](diagram.svg "")
 
@@ -6,5 +6,5 @@ This small tool separates input PNG file into two BMPs: image itself + mask (alp
 
 TODOs:
  - [ ] Load ICO
- - [ ] Load SVG
+
 

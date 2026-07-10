@@ -580,7 +580,7 @@ object Form1: TForm1
     Top = 40
     Width = 407
     DialogKind = dkPictureOpen
-    Filter = 'png|*.png'
+    Filter = 'png, svg|*.png;*.svg'
     FilterIndex = 0
     HideDirectories = False
     ButtonWidth = 23
@@ -594,8 +594,8 @@ object Form1: TForm1
     Left = 16
     Height = 16
     Top = 16
-    Width = 53
-    Caption = 'PNG file:'
+    Width = 59
+    Caption = 'Input file:'
     ParentColor = False
   end
   object Label2: TLabel
@@ -620,8 +620,8 @@ object Form1: TForm1
     Left = 16
     Height = 22
     Top = 159
-    Width = 160
-    Caption = 'Delete source PNG file'
+    Width = 122
+    Caption = 'Delete input file'
     TabOrder = 3
   end
   object GroupBox1: TGroupBox

@@ -46,7 +46,7 @@ implementation
 uses  fileinfo
   , winpeimagereader {need this for reading exe info}
   , elfreader {needed for reading ELF executables}
-  , Registry;
+  , Registry, BGRASVG;
 
 {$R *.lfm}
 
@@ -66,6 +66,9 @@ var
   Alpha: Byte;
   Col: TColor;
 begin
+  // FIXME: в linux при выборе svg файла ошибка "unknown picture extension"
+  // https://ibb.co/xShYjxzM
+
   Label3.Caption:='';
 
   if (InputFileNameEdit.Text = '') {or (OutputDirectoryEdit.Text = '')} then
@@ -75,7 +78,7 @@ begin
   TargetBitmap := TBitmap.Create;
   TargetBitmapMask := TBitmap.Create;
   try
-    InputImage.LoadFromFile(InputFileNameEdit.Text);
+    //InputImage.LoadFromFile(InputFileNameEdit.Text);
 
     ImgRect.SetLocation(0,0);
     ImgRect.Width  := InputImage.Width;
@@ -148,6 +151,9 @@ var
   I: Integer;
 begin
   Label3.Caption:='';
+
+  // включаем поддержку svg
+  BGRASVG.RegisterSvgFormat;
 
   LoadSettings;
 
