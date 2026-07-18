@@ -580,7 +580,7 @@ object Form1: TForm1
     Top = 40
     Width = 407
     DialogKind = dkPictureOpen
-    Filter = 'png, svg|*.png;*.svg'
+    Filter = 'png, ico, svg|*.png;*.svg;*.ico'
     FilterIndex = 0
     HideDirectories = False
     ButtonWidth = 23

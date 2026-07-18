@@ -46,7 +46,7 @@ implementation
 uses  fileinfo
   , winpeimagereader {need this for reading exe info}
   , elfreader {needed for reading ELF executables}
-  , Registry, StrUtils, BGRASVG;
+  , Registry, DlgSizeSelection, StrUtils, BGRASVG, BGRAIconCursor;
 
 {$R *.lfm}
 
@@ -61,12 +61,14 @@ procedure TForm1.LoadImage;
 var
   InputImage: TBGRABitmap = nil;
   svg: TBGRASVG = nil;
+  ico: TBGRAIconCursor = nil;
   TargetBitmap, TargetBitmapMask: TBitmap;
   ImgRect: TRect;
   X, Y: Integer;
   Alpha: Byte;
   Col: TColor;
-  IsSvg: Boolean;
+  I: integer;
+  SizeSelDlg: TImgSizeSelectionDialog = nil;
 begin
   // FIXME: в linux при выборе svg файла ошибка "unknown picture extension"
   // https://ibb.co/xShYjxzM
@@ -76,9 +78,7 @@ begin
   if (InputFileNameEdit.Text = '') {or (OutputDirectoryEdit.Text = '')} then
     exit;
 
-  //IsSvg := InputFileNameEdit.Text.EndsWith('.svg', True);
-  IsSvg:=EndsText('.svg', InputFileNameEdit.Text);
-  if IsSvg then
+  if EndsText('.svg', InputFileNameEdit.Text) then
   begin
     // исправление некорректных размеров для некоторых svg файлов
     svg := TBGRASVG.Create(InputFileNameEdit.Text);
@@ -91,7 +91,35 @@ begin
     end;
   end
   else
-    InputImage := TBGRABitmap.Create(InputFileNameEdit.Text);
+  begin
+    if EndsText('.ico', InputFileNameEdit.Text) then
+    begin
+      // возможность выбора размера из ico
+      ico := TBGRAIconCursor.Create(InputFileNameEdit.Text);
+      SizeSelDlg := TImgSizeSelectionDialog.Create(Self);
+      try
+        for i := 0 to ico.Count - 1 do
+        begin
+          //writeln('i:', i, '  ', ico.Width[i], 'x', ico.Height[i], ' px')
+          SizeSelDlg.AddSize(ico.Width[i],  ico.Height[i]);
+        end;
+        if SizeSelDlg.ShowModal = mrOK then
+        begin
+          InputImage := TBGRABitmap.Create(ico.GetBitmap(SizeSelDlg.SelectedSizeIdx));
+        end
+        else
+        begin
+          // размер не выбран
+          InputImage := TBGRABitmap.Create(0,0);
+        end;
+      finally
+        FreeAndNil(SizeSelDlg);
+        FreeAndNil(ico);
+      end;
+    end
+    else
+      InputImage := TBGRABitmap.Create(InputFileNameEdit.Text);
+  end;
 
   TargetBitmap := TBitmap.Create;
   TargetBitmapMask := TBitmap.Create;
