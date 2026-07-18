@@ -70,9 +70,6 @@ var
   I: integer;
   SizeSelDlg: TImgSizeSelectionDialog = nil;
 begin
-  // FIXME: в linux при выборе svg файла ошибка "unknown picture extension"
-  // https://ibb.co/xShYjxzM
-
   Label3.Caption:='';
 
   if (InputFileNameEdit.Text = '') {or (OutputDirectoryEdit.Text = '')} then
@@ -201,6 +198,15 @@ begin
 
   // включаем поддержку svg
   BGRASVG.RegisterSvgFormat;
+
+  {$IfDef Linux}
+    { FIX для linux:
+      если оставить DialogKind=dkPictureOpen, то в linux
+      при выборе svg файла будет ошибка "unknown picture extension"
+      https://ibb.co/xShYjxzM   }
+    InputFileNameEdit.DialogKind:=dkOpen;
+  {$EndIf}
+
 
   LoadSettings;
 
