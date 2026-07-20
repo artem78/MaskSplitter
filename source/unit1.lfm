@@ -565,7 +565,7 @@ object Form1: TForm1
   object OutputDirectoryEdit: TDirectoryEdit
     Left = 16
     Height = 26
-    Top = 104
+    Top = 142
     Width = 408
     ShowHidden = False
     ButtonWidth = 23
@@ -601,7 +601,7 @@ object Form1: TForm1
   object Label2: TLabel
     Left = 16
     Height = 16
-    Top = 82
+    Top = 120
     Width = 99
     Caption = 'Target directory:'
     ParentColor = False
@@ -616,12 +616,12 @@ object Form1: TForm1
     OnClick = SaveResultButtonClick
     TabOrder = 2
   end
-  object CheckBox1: TCheckBox
+  object DeleteInputFileCheckBox: TCheckBox
     Left = 16
     Height = 22
-    Top = 159
-    Width = 122
-    Caption = 'Delete input file'
+    Top = 72
+    Width = 210
+    Caption = 'Delete input file when finished'
     TabOrder = 3
   end
   object GroupBox1: TGroupBox

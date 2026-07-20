@@ -14,7 +14,7 @@ type
 
   TForm1 = class(TForm)
     SaveResultButton: TButton;
-    CheckBox1: TCheckBox;
+    DeleteInputFileCheckBox: TCheckBox;
     GroupBox1: TGroupBox;
     GroupBox2: TGroupBox;
     ImagePreview: TImage;
@@ -199,7 +199,7 @@ begin
   ImagePreview.Picture.SaveToFile(TargetImageFileName);
   MaskPreview.Picture.SaveToFile(TargetImageMaskFileName);
 
-  if CheckBox1.Checked then
+  if DeleteInputFileCheckBox.Checked then
     DeleteFile(InputFileNameEdit.Text);
 
   ShowMessage('Done!');
@@ -283,7 +283,7 @@ begin
         OutputDirectoryEdit.Text := Registry.ReadString('TargetDir');
 
       if Registry.ValueExists('DeleteSourceFile') then
-        CheckBox1.Checked := Registry.ReadBool('DeleteSourceFile');
+        DeleteInputFileCheckBox.Checked := Registry.ReadBool('DeleteSourceFile');
 
       Registry.CloseKey;
     end;
@@ -303,7 +303,7 @@ begin
     begin
       Registry.WriteString('SourceFile', InputFileNameEdit.Text);
       Registry.WriteString('TargetDir', OutputDirectoryEdit.Text);
-      Registry.WriteBool('DeleteSourceFile', CheckBox1.Checked);
+      Registry.WriteBool('DeleteSourceFile', DeleteInputFileCheckBox.Checked);
       Registry.CloseKey;
     end;
   finally
