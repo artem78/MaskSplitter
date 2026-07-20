@@ -34,3 +34,4 @@ lib/
 # Свои определения
 MaskSplitter
 *.backup
+/build/
