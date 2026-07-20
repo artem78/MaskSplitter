@@ -606,14 +606,14 @@ object Form1: TForm1
     Caption = 'Target directory:'
     ParentColor = False
   end
-  object Button1: TButton
+  object SaveResultButton: TButton
     Left = 144
     Height = 25
     Top = 424
     Width = 143
     Anchors = [akLeft, akBottom]
     Caption = 'Save to BMPs'
-    OnClick = Button1Click
+    OnClick = SaveResultButtonClick
     TabOrder = 2
   end
   object CheckBox1: TCheckBox
@@ -666,7 +666,7 @@ object Form1: TForm1
       Center = True
     end
   end
-  object Label3: TLabel
+  object SizeLabel: TLabel
     Left = 16
     Height = 16
     Top = 408

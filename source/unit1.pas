@@ -13,18 +13,18 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
-    Button1: TButton;
+    SaveResultButton: TButton;
     CheckBox1: TCheckBox;
     GroupBox1: TGroupBox;
     GroupBox2: TGroupBox;
     ImagePreview: TImage;
-    Label3: TLabel;
+    SizeLabel: TLabel;
     MaskPreview: TImage;
     Label1: TLabel;
     Label2: TLabel;
     OutputDirectoryEdit: TDirectoryEdit;
     InputFileNameEdit: TFileNameEdit;
-    procedure Button1Click(Sender: TObject);
+    procedure SaveResultButtonClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure InputFileNameEditChange(Sender: TObject);
@@ -52,111 +52,133 @@ uses  fileinfo
 
 { TForm1 }
 
-procedure TForm1.Button1Click(Sender: TObject);
+procedure TForm1.SaveResultButtonClick(Sender: TObject);
 begin
-  SaveResult;
+  if (ImagePreview.Picture.Height = 0) or (ImagePreview.Picture.Width = 0) or
+     (MaskPreview.Picture.Width = 0) or (MaskPreview.Picture.Height = 0) then
+    MessageDlg('Image not selected!', mtError, [mbOK], 0)
+  else
+    SaveResult;
 end;
 
 procedure TForm1.LoadImage;
-var
-  InputImage: TBGRABitmap = nil;
-  svg: TBGRASVG = nil;
-  ico: TBGRAIconCursor = nil;
-  TargetBitmap, TargetBitmapMask: TBitmap;
-  ImgRect: TRect;
-  X, Y: Integer;
-  Alpha: Byte;
-  Col: TColor;
-  I: integer;
-  SizeSelDlg: TImgSizeSelectionDialog = nil;
-begin
-  Label3.Caption:='';
-
-  if (InputFileNameEdit.Text = '') {or (OutputDirectoryEdit.Text = '')} then
-    exit;
-
-  if EndsText('.svg', InputFileNameEdit.Text) then
+  function CreateBitmapFromSvg: TBGRABitmap;
+  var
+    svg: TBGRASVG = nil;
   begin
-    // исправление некорректных размеров для некоторых svg файлов
-    svg := TBGRASVG.Create(InputFileNameEdit.Text);
+    Result := nil;
+
     try
-      svg.ConvertToUnit(cuCustom); // <----
-      InputImage := TBGRABitmap.Create(Round(svg.WidthAsPixel), Round(svg.HeightAsPixel));
-      svg.StretchDraw(InputImage.Canvas2D, 0, 0, cuCustom);
+      // исправление некорректных размеров для некоторых svg файлов
+      svg := TBGRASVG.Create(InputFileNameEdit.Text);
+      try
+        svg.ConvertToUnit(cuCustom); // <----
+        Result := TBGRABitmap.Create(Round(svg.WidthAsPixel), Round(svg.HeightAsPixel));
+        svg.StretchDraw(Result.Canvas2D, 0, 0, cuCustom);
+      finally
+        FreeAndNil(svg);
+      end;
     finally
       FreeAndNil(svg);
     end;
-  end
-  else
-  begin
-    if EndsText('.ico', InputFileNameEdit.Text) then
-    begin
-      // возможность выбора размера из ico
-      ico := TBGRAIconCursor.Create(InputFileNameEdit.Text);
-      SizeSelDlg := TImgSizeSelectionDialog.Create(Self);
-      try
-        for i := 0 to ico.Count - 1 do
-        begin
-          //writeln('i:', i, '  ', ico.Width[i], 'x', ico.Height[i], ' px')
-          SizeSelDlg.AddSize(ico.Width[i],  ico.Height[i]);
-        end;
-        if SizeSelDlg.ShowModal = mrOK then
-        begin
-          InputImage := TBGRABitmap.Create(ico.GetBitmap(SizeSelDlg.SelectedSizeIdx));
-        end
-        else
-        begin
-          // размер не выбран
-          InputImage := TBGRABitmap.Create(0,0);
-        end;
-      finally
-        FreeAndNil(SizeSelDlg);
-        FreeAndNil(ico);
-      end;
-    end
-    else
-      InputImage := TBGRABitmap.Create(InputFileNameEdit.Text);
   end;
 
-  TargetBitmap := TBitmap.Create;
-  TargetBitmapMask := TBitmap.Create;
-  try
-    //InputImage.LoadFromFile(InputFileNameEdit.Text);
+  function CreateBitmapFromIco: TBGRABitmap;
+  var
+    ico: TBGRAIconCursor = nil;
+    SizeSelDlg: TImgSizeSelectionDialog = nil;
+    I: Integer;
+  begin
+    Result := nil;
 
-    ImgRect.SetLocation(0,0);
-    ImgRect.Width  := InputImage.Width;
-    ImgRect.Height := InputImage.Height;
-
-    TargetBitmap.PixelFormat := pf24bit;
-    TargetBitmap.Width  := InputImage.Width;
-    TargetBitmap.Height := InputImage.Height;
-
-    {TargetBitmap.Canvas.Brush.Color := clWhite;
-    TargetBitmap.Canvas.FillRect(ImgRect);}
-
-    TargetBitmapMask.PixelFormat := pf24bit;
-    TargetBitmapMask.Width  := InputImage.Width;
-    TargetBitmapMask.Height := InputImage.Height;
-
-    for X := 0 to InputImage.Width - 1 do
-    begin
-      for Y := 0 to InputImage.Height - 1 do
+    // возможность выбора размера из ico
+    ico := TBGRAIconCursor.Create(InputFileNameEdit.Text);
+    SizeSelDlg := TImgSizeSelectionDialog.Create(Self);
+    try
+      for i := 0 to ico.Count - 1 do
       begin
-         Alpha := InputImage.ScanAt(X, Y).alpha;
-         Col := RGBToColor(Alpha, Alpha, Alpha);
-         TargetBitmapMask.Canvas.Pixels[X, Y] := Col;
-         TargetBitmap.Canvas.Pixels[X, Y] := InputImage.ScanAt(X, Y).ToColor();
+        //writeln('i:', i, '  ', ico.Width[i], 'x', ico.Height[i], ' px')
+        SizeSelDlg.AddSize(ico.Width[i],  ico.Height[i]);
       end;
+      if SizeSelDlg.ShowModal = mrOK then
+      begin
+        Result := TBGRABitmap.Create(ico.GetBitmap(SizeSelDlg.SelectedSizeIdx));
+      end
+      {else
+      begin
+        // размер не выбран
+      end};
+    finally
+      FreeAndNil(SizeSelDlg);
+      FreeAndNil(ico);
     end;
+  end;
 
-    ImagePreview.Picture.Assign(TargetBitmap);
-    MaskPreview.Picture.Assign(TargetBitmapMask);
-    Label3.Caption:=format('%dx%d px', [InputImage.Width, InputImage.Height]);
-  finally
-    FreeAndNil(InputImage);
-    //FreeAndNil(svg);
-    TargetBitmap.Free;
-    TargetBitmapMask.Free;
+var
+  InputImage: TBGRABitmap = nil;
+  TargetBitmap, TargetBitmapMask: TBitmap;
+  //ImgRect: TRect;
+  X, Y: Integer;
+  Alpha: Byte;
+  Col: TColor;
+  Extension: string;
+begin
+  SizeLabel.Caption:='';
+  ImagePreview.Picture.Clear;
+  MaskPreview.Picture.Clear;
+
+  if (InputFileNameEdit.Text = '') or not FileExists(InputFileNameEdit.Text ) {or (OutputDirectoryEdit.Text = '')} then
+    exit;
+
+  Extension := ExtractFileExt(InputFileNameEdit.Text);
+  RemoveLeadingChars(Extension, ['.']);
+  case LowerCase(Extension) of
+    'svg': InputImage := CreateBitmapFromSvg;
+    'ico': InputImage := CreateBitmapFromIco;
+  else // png и, возможно, прочие
+     InputImage := TBGRABitmap.Create(InputFileNameEdit.Text);
+  end;
+
+
+  if Assigned(InputImage) then
+  begin
+    TargetBitmap := TBitmap.Create;
+    TargetBitmapMask := TBitmap.Create;
+    try
+      {ImgRect.SetLocation(0,0);
+      ImgRect.Width  := InputImage.Width;
+      ImgRect.Height := InputImage.Height;}
+
+      TargetBitmap.PixelFormat := pf24bit;
+      TargetBitmap.Width  := InputImage.Width;
+      TargetBitmap.Height := InputImage.Height;
+
+      {TargetBitmap.Canvas.Brush.Color := clWhite;
+      TargetBitmap.Canvas.FillRect(ImgRect);}
+
+      TargetBitmapMask.PixelFormat := pf24bit;
+      TargetBitmapMask.Width  := InputImage.Width;
+      TargetBitmapMask.Height := InputImage.Height;
+
+      for X := 0 to InputImage.Width - 1 do
+      begin
+        for Y := 0 to InputImage.Height - 1 do
+        begin
+           Alpha := InputImage.ScanAt(X, Y).alpha;
+           Col := RGBToColor(Alpha, Alpha, Alpha);
+           TargetBitmapMask.Canvas.Pixels[X, Y] := Col;
+           TargetBitmap.Canvas.Pixels[X, Y] := InputImage.ScanAt(X, Y).ToColor();
+        end;
+      end;
+
+      ImagePreview.Picture.Assign(TargetBitmap);
+      MaskPreview.Picture.Assign(TargetBitmapMask);
+      SizeLabel.Caption:=format('%dx%d px', [InputImage.Width, InputImage.Height]);
+    finally
+      FreeAndNil(InputImage);
+      TargetBitmap.Free;
+      TargetBitmapMask.Free;
+    end;
   end;
 end;
 
@@ -194,7 +216,7 @@ var
   FileVerInfo: TFileVersionInfo;
   I: Integer;
 begin
-  Label3.Caption:='';
+  SizeLabel.Caption:='';
 
   // включаем поддержку svg
   BGRASVG.RegisterSvgFormat;
